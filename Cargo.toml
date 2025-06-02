@@ -1,0 +1,15 @@
+[package]
+name = "rsa-tool"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aes = "0.8.4"
+aes-gcm = "0.10.3"
+anyhow = "1.0.98"
+base64 = "0.22.1"
+clap = { version = "4.5.39", features = ["derive"] }
+pem = "3.0.5"
+rand = "0.8.5"
+rsa = "0.9.8"
+sha2 = "0.10.9"
