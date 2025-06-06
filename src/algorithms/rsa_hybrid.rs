@@ -1,15 +1,19 @@
 use aes::cipher::generic_array::GenericArray;
 use aes_gcm::aead::{Aead, OsRng};
 use aes_gcm::{AeadCore, Aes256Gcm, KeyInit};
-
-use anyhow::{Context, Result};
+use anyhow::Context;
 use base64::{Engine as _, engine::general_purpose};
 use rsa::{Oaep, RsaPrivateKey};
 use rsa::{RsaPublicKey, pkcs8::DecodePrivateKey, pkcs8::DecodePublicKey};
 use sha2::Sha256;
+use std::error::Error;
 use std::fs;
 
-pub fn encrypt_file(input_file: &str, output_file: &str, public_key_file: &str) -> Result<()> {
+pub fn encrypt_file(
+    input_file: &str,
+    output_file: &str,
+    public_key_file: &str,
+) -> Result<(), Box<dyn Error>> {
     // First let's load the RSA Public Key
     let public_key_pem = fs::read_to_string(public_key_file)?;
     let public_key = RsaPublicKey::from_public_key_pem(&public_key_pem)?;
@@ -41,7 +45,11 @@ pub fn encrypt_file(input_file: &str, output_file: &str, public_key_file: &str) 
     Ok(())
 }
 
-pub fn decrypt_file(input_file: &str, output_file: &str, private_key_file: &str) -> Result<()> {
+pub fn decrypt_file(
+    input_file: &str,
+    output_file: &str,
+    private_key_file: &str,
+) -> Result<(), Box<dyn Error>> {
     let private_key_pem = fs::read_to_string(private_key_file)?;
     let private_key = RsaPrivateKey::from_pkcs8_pem(&private_key_pem)?;
 

@@ -1,15 +1,11 @@
 mod components;
 mod tabs;
-use aes_only::{decrypt_with_aes, encrypt_with_aes};
-use classical_ciphers::{caesar_cipher_decrypt, caesar_cipher_encrypt};
-use gen_key_pair::generate_key_pair;
-use rsa_hybrid::{decrypt_file, encrypt_file};
+use algorithms::aes_only::{decrypt_with_aes, encrypt_with_aes};
+use algorithms::classical_ciphers::{caesar_cipher_decrypt, caesar_cipher_encrypt};
+use algorithms::gen_key_pair::generate_key_pair;
+use algorithms::rsa_hybrid::{decrypt_file, encrypt_file};
 use tabs::classical::ClassicalTab;
-mod aes_only;
-mod classical_ciphers;
-mod gen_key_pair;
-mod rsa_hybrid;
-use color_eyre::Result;
+mod algorithms;
 use ratatui::{
     DefaultTerminal,
     buffer::Buffer,
@@ -20,10 +16,10 @@ use ratatui::{
     text::Line,
     widgets::{Block, Padding, Paragraph, Tabs, Widget},
 };
+use std::error::Error;
 use strum::{Display, EnumIter, FromRepr, IntoEnumIterator};
 
-fn main() -> Result<()> {
-    color_eyre::install()?;
+fn main() -> Result<(), Box<dyn Error>> {
     let terminal = ratatui::init();
     let app_result = App::default().run(terminal);
     ratatui::restore();
@@ -58,7 +54,7 @@ enum CryptoTab {
 }
 
 impl App {
-    fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
+    fn run(mut self, mut terminal: DefaultTerminal) -> Result<(), Box<dyn Error>> {
         while self.state == AppState::Running {
             terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
             self.handle_events()?;
@@ -69,39 +65,37 @@ impl App {
     fn handle_events(&mut self) -> std::io::Result<()> {
         if let Event::Key(key) = event::read()? {
             if key.kind == KeyEventKind::Press {
-                match self.selected_tab {
-                    CryptoTab::Classical => {
-                        if let Some(editing) = self.classical_tab.is_editing() {
-                            if !editing {
-                                match key.code {
-                                    KeyCode::Char('l') | KeyCode::Right => self.next_tab(),
-                                    KeyCode::Char('h') | KeyCode::Left => self.previous_tab(),
-                                    KeyCode::Char('q') | KeyCode::Esc => self.quit(),
-                                    _ => self.classical_tab.handle_event(key.code),
-                                }
-                            } else {
-                                self.classical_tab.handle_event(key.code);
-                            }
-                        } else {
-                            match key.code {
-                                KeyCode::Char('l') | KeyCode::Right => self.next_tab(),
-                                KeyCode::Char('h') | KeyCode::Left => self.previous_tab(),
-                                KeyCode::Char('q') | KeyCode::Esc => self.quit(),
-                                _ => self.classical_tab.handle_event(key.code),
-                            }
-                        }
-                    }
-                    _ => match key.code {
-                        KeyCode::Char('l') | KeyCode::Right => self.next_tab(),
-                        KeyCode::Char('h') | KeyCode::Left => self.previous_tab(),
-                        KeyCode::Char('q') | KeyCode::Esc => self.quit(),
-                        _ => {}
-                    },
-                }
+                self.handle_key_press(key.code);
             }
         }
-
         Ok(())
+    }
+
+    fn handle_key_press(&mut self, key_code: KeyCode) {
+        match self.selected_tab {
+            CryptoTab::Classical => self.handle_classical_tab_events(key_code),
+            _ => self.handle_global_events(key_code),
+        }
+    }
+
+    fn handle_classical_tab_events(&mut self, key_code: KeyCode) {
+        if let Some(editing) = self.classical_tab.is_editing() {
+            if !editing {
+                self.handle_global_events(key_code);
+            }
+            self.classical_tab.handle_event(key_code);
+        } else {
+            self.handle_global_events(key_code);
+        }
+    }
+
+    fn handle_global_events(&mut self, key_code: KeyCode) {
+        match key_code {
+            KeyCode::Char('l') | KeyCode::Right => self.next_tab(),
+            KeyCode::Char('h') | KeyCode::Left => self.previous_tab(),
+            KeyCode::Char('q') | KeyCode::Esc => self.quit(),
+            _ => {}
+        }
     }
 
     fn next_tab(&mut self) {

@@ -1,4 +1,4 @@
-use crate::classical_ciphers::{caesar_cipher_decrypt, caesar_cipher_encrypt};
+use crate::algorithms::classical_ciphers::{caesar_cipher_decrypt, caesar_cipher_encrypt};
 use crate::components::cipher_component::CipherComponent;
 use ratatui::crossterm::event::KeyCode;
 use ratatui::{

@@ -4,11 +4,16 @@
 use aes::cipher::generic_array::GenericArray;
 use aes_gcm::aead::{Aead, OsRng};
 use aes_gcm::{AeadCore, Aes256Gcm, KeyInit};
-use anyhow::{Context, Result};
+use anyhow::Context;
 use base64::{Engine as _, engine::general_purpose};
+use std::error::Error;
 use std::fs;
 
-pub fn encrypt_with_aes(input_file: &str, output_file: &str, key_file: &str) -> Result<()> {
+pub fn encrypt_with_aes(
+    input_file: &str,
+    output_file: &str,
+    key_file: &str,
+) -> Result<(), Box<dyn Error>> {
     let aes_key = Aes256Gcm::generate_key(&mut OsRng);
     let cipher = Aes256Gcm::new(&aes_key);
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
@@ -36,7 +41,11 @@ pub fn encrypt_with_aes(input_file: &str, output_file: &str, key_file: &str) -> 
     Ok(())
 }
 
-pub fn decrypt_with_aes(input_file: &str, output_file: &str, key_file: &str) -> Result<()> {
+pub fn decrypt_with_aes(
+    input_file: &str,
+    output_file: &str,
+    key_file: &str,
+) -> Result<(), Box<dyn Error>> {
     let content = fs::read_to_string(input_file)?;
     let mut lines = content.lines();
 
