@@ -18,6 +18,7 @@ use ratatui::{
 };
 use std::error::Error;
 use strum::{Display, EnumIter, FromRepr, IntoEnumIterator};
+use tabs::symmetric::SymmetricTab;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let terminal = ratatui::init();
@@ -31,6 +32,7 @@ struct App {
     state: AppState,
     selected_tab: CryptoTab,
     classical_tab: ClassicalTab,
+    symmetric_tab: SymmetricTab,
 }
 
 #[derive(Default, Clone, Copy, PartialEq, Eq)]
@@ -74,6 +76,7 @@ impl App {
     fn handle_key_press(&mut self, key_code: KeyCode) {
         match self.selected_tab {
             CryptoTab::Classical => self.handle_classical_tab_events(key_code),
+            CryptoTab::Symmetric => self.handle_symmetric_tab_events(key_code),
             _ => self.handle_global_events(key_code),
         }
     }
@@ -84,6 +87,17 @@ impl App {
                 self.handle_global_events(key_code);
             }
             self.classical_tab.handle_event(key_code);
+        } else {
+            self.handle_global_events(key_code);
+        }
+    }
+
+    fn handle_symmetric_tab_events(&mut self, key_code: KeyCode) {
+        if let Some(editing) = self.symmetric_tab.is_editing() {
+            if !editing {
+                self.handle_global_events(key_code);
+            }
+            self.symmetric_tab.handle_event(key_code);
         } else {
             self.handle_global_events(key_code);
         }
@@ -156,7 +170,7 @@ impl Widget for &App {
         // self.selected_tab.render(body, buf);
         match self.selected_tab {
             CryptoTab::Classical => self.classical_tab.render(body, buf),
-            CryptoTab::Symmetric => Paragraph::new("Coming soon").render(body, buf),
+            CryptoTab::Symmetric => self.symmetric_tab.render(body, buf),
             CryptoTab::Asymmetric => Paragraph::new("Coming soon").render(body, buf),
             CryptoTab::Misc => Paragraph::new("Coming soon").render(body, buf),
         }

@@ -56,10 +56,10 @@ impl CipherComponent for CaesarCipherComponent {
                 }
             }
             KeyCode::Up => {
-                self.key = self.key.wrapping_add(1);
+                self.key = (self.key + 1) % 26;
             }
             KeyCode::Down => {
-                self.key = self.key.wrapping_sub(1);
+                self.key = if self.key == 0 { 25 } else { self.key - 1 };
             }
             _ => {}
         }
