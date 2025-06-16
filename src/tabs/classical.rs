@@ -1,3 +1,4 @@
+use crate::components::vigenere::VigenereCipherComponent;
 use crate::components::{caesar::CaesarCipherComponent, cipher_component::CipherComponent};
 use ratatui::crossterm::event::KeyCode;
 use ratatui::widgets::{Paragraph, Widget};
@@ -14,7 +15,10 @@ impl Default for ClassicalTab {
         Self {
             selected: 0,
             mode: ClassicalMode::Selecting,
-            components: vec![Box::new(CaesarCipherComponent::default())],
+            components: vec![
+                Box::new(CaesarCipherComponent::default()),
+                Box::new(VigenereCipherComponent::default()),
+            ],
         }
     }
 }
@@ -69,10 +73,10 @@ impl ClassicalTab {
     /// Handle keyboard events in selection mode
     fn handle_selection_mode(&mut self, key: KeyCode) {
         match key {
-            KeyCode::Char('j') => {
+            KeyCode::Char('j') | KeyCode::Up => {
                 self.selected = (self.selected + 1) % self.components.len();
             }
-            KeyCode::Char('k') => {
+            KeyCode::Char('k') | KeyCode::Down => {
                 if self.selected == 0 {
                     self.selected = self.components.len() - 1;
                 } else {
