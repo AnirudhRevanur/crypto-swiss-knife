@@ -9,6 +9,7 @@ aes-gcm = "0.10.3"
 anyhow = "1.0.98"
 base64 = "0.22.1"
 crossterm = "0.29.0"
+nalgebra = {version = "0.33.2", features = ["std"]}
 playfair_cipher = "0.3.5"
 ratatui = "0.29.0"
 rsa = "0.9.8"
