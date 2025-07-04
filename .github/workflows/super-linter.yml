@@ -2,7 +2,7 @@ name: Lint Code Base
 
 permissions:
   contents: read
-  status: write
+  statuses: write
 
 on:
   pull_request:
