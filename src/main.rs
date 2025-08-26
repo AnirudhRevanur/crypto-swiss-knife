@@ -1,6 +1,7 @@
 mod components;
 mod tabs;
 use tabs::classical::ClassicalTab;
+use tabs::misc::MiscTab;
 mod algorithms;
 use ratatui::{
     DefaultTerminal,
@@ -29,6 +30,7 @@ struct App {
     selected_tab: CryptoTab,
     classical_tab: ClassicalTab,
     symmetric_tab: SymmetricTab,
+    misc_tab: MiscTab,
 }
 
 #[derive(Default, Clone, Copy, PartialEq, Eq)]
@@ -73,6 +75,7 @@ impl App {
         match self.selected_tab {
             CryptoTab::Classical => self.handle_classical_tab_events(key_code),
             CryptoTab::Symmetric => self.handle_symmetric_tab_events(key_code),
+            CryptoTab::Misc => self.handle_misc_tab_events(key_code),
             _ => self.handle_global_events(key_code),
         }
     }
@@ -94,6 +97,17 @@ impl App {
                 self.handle_global_events(key_code);
             }
             self.symmetric_tab.handle_event(key_code);
+        } else {
+            self.handle_global_events(key_code);
+        }
+    }
+
+    fn handle_misc_tab_events(&mut self, key_code: KeyCode) {
+        if let Some(editing) = self.misc_tab.is_editing() {
+            if !editing {
+                self.handle_global_events(key_code);
+            }
+            self.misc_tab.handle_event(key_code);
         } else {
             self.handle_global_events(key_code);
         }
@@ -168,7 +182,7 @@ impl Widget for &App {
             CryptoTab::Classical => self.classical_tab.render(body, buf),
             CryptoTab::Symmetric => self.symmetric_tab.render(body, buf),
             CryptoTab::Asymmetric => Paragraph::new("Coming soon").render(body, buf),
-            CryptoTab::Misc => Paragraph::new("Coming soon").render(body, buf),
+            CryptoTab::Misc => self.misc_tab.render(body, buf),
         }
         render_footer(footer, buf);
     }

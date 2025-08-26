@@ -9,9 +9,12 @@ aes-gcm = "0.10.3"
 anyhow = "1.0.98"
 base64 = "0.22.1"
 crossterm = "0.29.0"
+digest = "0.10.7"
+md5 = "0.8.0"
 nalgebra = {version = "0.33.2", features = ["std"]}
 playfair_cipher = "0.3.5"
 ratatui = "0.29.0"
 rsa = "0.9.8"
+sha1 = "0.10.6"
 sha2 = "0.10.9"
 strum = {version = "0.27.1", features = ["derive"]}
